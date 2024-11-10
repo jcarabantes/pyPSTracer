@@ -12,7 +12,7 @@
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/your-username/pyPSTracer.git
+   git clone https://github.com/jcarabantes/pyPSTracer/edit/main/README.md
    cd pyPSTracer
    ```
 
@@ -25,15 +25,15 @@
 
 ## Usage
 
-The main script is located at `pyPSTracer/pyPSTracer.py`. To run it, specify the path to the PowerShell script you want to analyze and the target function name to trace dependencies.
+The main script is located at `pyPSTracer.py`. To run it, specify the path to the PowerShell script you want to analyze and the target function name to trace dependencies.
 
 ```bash
-python pyPSTracer/pyPSTracer.py <path_to_script> <target_function_name>
+python pyPSTracer.py <path_to_script> <target_function_name>
 ```
 
 ### Example
 
-To trace function calls within the `Invoke-MyFunction` function of a PowerShell script:
+To trace function calls within the `Get-ModulePrivateFunction` function of a PowerShell script:
 
 ```bash
 python pyPSTracer.py ExamplePS.psm1 Get-ModulePrivateFunction
@@ -42,4 +42,4 @@ python pyPSTracer.py ExamplePS.psm1 Get-ModulePrivateFunction
 The output will display all dependent functions that `Get-ModulePrivateFunction` calls within the specified script.
 
 ### Errors
-There are some errors if "function" appears in a write-console, etc. So some errors may appear but should be easy to detect
+There are some errors if "function" appears in a write-console, etc. but should be easy to detect
