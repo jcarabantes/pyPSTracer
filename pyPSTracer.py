@@ -4,6 +4,7 @@ from rich import print
 from rich.console import Console
 
 console = Console()
+VERBOSE = False
 
 def remove_comments(script_content):
     """Removes single-line and multi-line comments from a PowerShell script."""
@@ -45,9 +46,12 @@ def find_function_lines(script_content, function_name):
 @click.command()
 @click.argument('script_path', type=click.Path(exists=True))
 @click.argument('target_function', type=str)
-def analyze_function(script_path, target_function):
+@click.option('-v', '--verbose', is_flag=True, help="Enable verbose output")
+def analyze_function(script_path, target_function, verbose):
     """Analyzes a specific function in a PowerShell script to identify dependent functions."""
-    
+    global VERBOSE
+    VERBOSE = verbose
+
     # Read the script content
     with open(script_path, 'r', encoding='utf-8') as file:
         script_content = file.read()
@@ -73,7 +77,7 @@ def analyze_function(script_path, target_function):
     # Display the lines of the target function
     console.print(f"[bold green]Lines of the function '{target_function}':[/bold green]")
     for line in target_function_lines:
-        console.print(line)
+        if VERBOSE: console.print(line)
     
     # Find dependent functions within the target function
     dependent_functions = []
