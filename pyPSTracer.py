@@ -1,10 +1,29 @@
 import re
-import rich_click as click  # Import rich-click instead of click
+import rich_click as click
 from rich import print
 from rich.console import Console
 
 console = Console()
 VERBOSE = False
+
+def banner():
+    print("""
+                  8888888b.   .d8888b. 88888888888                                       
+                  888   Y88b d88P  Y88b    888                                           
+                  888    888 Y88b.         888                                           
+88888b.  888  888 888   d88P  "Y888b.      888  888d888 8888b.   .d8888b .d88b.  888d888 
+888 "88b 888  888 8888888P"      "Y88b.    888  888P"      "88b d88P"   d8P  Y8b 888P"   
+888  888 888  888 888              "888    888  888    .d888888 888     88888888 888     
+888 d88P Y88b 888 888        Y88b  d88P    888  888    888  888 Y88b.   Y8b.     888     
+88888P"   "Y88888 888         "Y8888P"     888  888    "Y888888  "Y8888P "Y8888  888     
+888           888                                                                        
+888      Y8b d88P                                                                        
+888       "Y88P"                                                                         
+
+Simple PS Function Tracer
+Used to reduce scripts like PowerView to further for obfuscation
+  @Mr_Redsmasher
+""")
 
 def remove_comments(script_content):
     """Removes single-line and multi-line comments from a PowerShell script."""
@@ -43,15 +62,14 @@ def find_function_lines(script_content, function_name):
 
     return function_lines
 
-@click.command()
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.argument('script_path', type=click.Path(exists=True))
 @click.argument('target_function', type=str)
 @click.option('-v', '--verbose', is_flag=True, help="Enable verbose output")
-def analyze_function(script_path, target_function, verbose):
+def analyze_function( script_path, target_function, verbose):
     """Analyzes a specific function in a PowerShell script to identify dependent functions."""
     global VERBOSE
     VERBOSE = verbose
-
     # Read the script content
     with open(script_path, 'r', encoding='utf-8') as file:
         script_content = file.read()
@@ -97,5 +115,5 @@ def analyze_function(script_path, target_function, verbose):
         console.print(f"[bold cyan]No dependent functions found in '{target_function}'.[/bold cyan]")
 
 if __name__ == "__main__":
+    banner()
     analyze_function()
-
