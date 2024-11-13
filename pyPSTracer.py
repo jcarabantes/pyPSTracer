@@ -1,12 +1,13 @@
 import re
 import rich_click as click
-from rich import print
+# from rich import print as rich_print
 from rich.console import Console
 
 console = Console()
 VERBOSE = False
 
 def banner():
+    """Print banner"""
     print("""
                   8888888b.   .d8888b. 88888888888                                       
                   888   Y88b d88P  Y88b    888                                           
@@ -43,7 +44,6 @@ def find_function_lines(script_content, function_name):
     in_function = False
     open_braces = 0
 
-    # for i, line in enumerate(lines):
     for line in lines:
         # If we find the start of the function
         if function_start_pattern.match(line):
@@ -61,11 +61,23 @@ def find_function_lines(script_content, function_name):
 
     return function_lines
 
+def find_functions_with_lines(script_content):
+    """Finds all functions in the script and returns their names along with their line numbers."""
+    function_pattern = re.compile(
+        r'function\s+([a-zA-Z0-9_\-\.]+)\s*\{?', re.MULTILINE | re.IGNORECASE)
+    functions_with_lines = []
+    for match in function_pattern.finditer(script_content):
+        function_name = match.group(1)
+        start_pos = match.start()
+        line_number = script_content.count('\n', 0, start_pos) + 1  # Count lines up to match
+        functions_with_lines.append((function_name, line_number))
+    return functions_with_lines
+
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.argument('script_path', type=click.Path(exists=True))
 @click.argument('target_function', type=str)
 @click.option('-v', '--verbose', is_flag=True, help="Enable verbose output")
-def analyze_function( script_path, target_function, verbose):
+def analyze_function(script_path, target_function, verbose):
     """Analyzes a specific function in a PowerShell script to identify dependent functions."""
     global VERBOSE
     VERBOSE = verbose
@@ -73,40 +85,44 @@ def analyze_function( script_path, target_function, verbose):
     with open(script_path, 'r', encoding='utf-8') as file:
         script_content = file.read()
     script_content_no_comments = remove_comments(script_content)
-    # Regular expression to detect all functions in the script
-    function_pattern = re.compile(
-        r'function\s+([a-zA-Z0-9_\-\.]+)\s*\{?', re.MULTILINE | re.IGNORECASE)
-    all_functions = function_pattern.findall(script_content_no_comments)
+    # Find all functions with their line numbers
+    all_functions_with_lines = find_functions_with_lines(script_content_no_comments)
+    all_functions = [func[0] for func in all_functions_with_lines]
     # Display all functions found for debugging
     console.print("[bold yellow]Functions found in the file:[/bold yellow]", all_functions)
     # Check if the target function is in the file
     if target_function not in all_functions:
         console.print(
-            f"""[bold red]Error:[/bold red] The 
-            function '{target_function}' was not 
-            found in the file.""")
+            f"""[bold red]Error:[/bold red] 
+            The function '{target_function}' 
+            was not found in the file.""")
         return
     # Get all lines of the target function
     target_function_lines = find_function_lines(script_content_no_comments, target_function)
     # Display the lines of the target function
-    console.print(f"[bold green]Lines of the function '{target_function}':[/bold green]")
+    console.print(f"""[bold green]Lines of the
+     function '{target_function}':[/bold green]""")
     for line in target_function_lines:
         if VERBOSE: console.print(line)
     # Find dependent functions within the target function
     dependent_functions = []
-    for func in all_functions:
+    for func, line_number in all_functions_with_lines:
         # Exclude the target function itself to avoid false positives
         if func != target_function:
             # Check if any of the other functions are called within the lines of the target function
             for line in target_function_lines:
                 if re.search(rf'\b{re.escape(func)}\b', line):
-                    dependent_functions.append(func)
+                    dependent_functions.append((func, line_number))
                     break  # Found it, no need to keep searching this function
-    # Display the dependent functions found
+    # Display the dependent functions found with their line numbers
     if dependent_functions:
-        console.print(f"[bold cyan]Dependent functions found in '{target_function}':[/bold cyan] {dependent_functions}")
+        console.print(f"[bold cyan]Dependent functions found in '{target_function}':[/bold cyan]")
+        for func, line in dependent_functions:
+            console.print(f" - [bold blue]{func}[/bold blue] (Line {line})")
     else:
-        console.print(f"[bold cyan]No dependent functions found in '{target_function}'.[/bold cyan]")
+        console.print(f"""
+        [bold cyan]No dependent functions found
+         in '{target_function}'.[/bold cyan]""")
 
 if __name__ == "__main__":
     banner()
