@@ -1,10 +1,15 @@
+"""
+pyPSTracer - A script to trace PowerShell functions and dependencies.
+Developed by @Mr_Redsmasher.
+"""
+
+
 import re
 import rich_click as click
 # from rich import print as rich_print
 from rich.console import Console
 
 console = Console()
-VERBOSE = False
 
 def banner():
     """Print banner"""
@@ -76,11 +81,10 @@ def find_functions_with_lines(script_content):
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.argument('script_path', type=click.Path(exists=True))
 @click.argument('target_function', type=str)
-@click.option('-v', '--verbose', is_flag=True, help="Enable verbose output")
-def analyze_function(script_path, target_function, verbose):
+@click.option('-v', '--verbose', is_flag=True, help="Enable verbose output - this will show the function code")
+@click.option('-l', '--list', is_flag=True, help="List all functions detected in the script")
+def analyze_function(script_path, target_function, verbose, list):
     """Analyzes a specific function in a PowerShell script to identify dependent functions."""
-    global VERBOSE
-    VERBOSE = verbose
     # Read the script content
     with open(script_path, 'r', encoding='utf-8') as file:
         script_content = file.read()
@@ -89,21 +93,18 @@ def analyze_function(script_path, target_function, verbose):
     all_functions_with_lines = find_functions_with_lines(script_content_no_comments)
     all_functions = [func[0] for func in all_functions_with_lines]
     # Display all functions found for debugging
-    console.print("[bold yellow]Functions found in the file:[/bold yellow]", all_functions)
+    if list: console.print("[bold yellow]Functions found in the file:[/bold yellow]", all_functions)
     # Check if the target function is in the file
     if target_function not in all_functions:
         console.print(
-            f"""[bold red]Error:[/bold red] 
-            The function '{target_function}' 
-            was not found in the file.""")
+            f"""[bold red]Error:[/bold red] the function '{target_function}' was not found in the file.""")
         return
     # Get all lines of the target function
     target_function_lines = find_function_lines(script_content_no_comments, target_function)
     # Display the lines of the target function
-    console.print(f"""[bold green]Lines of the
-     function '{target_function}':[/bold green]""")
+    if verbose: console.print(f"""[bold green]Lines of the function '{target_function}':[/bold green]""")
     for line in target_function_lines:
-        if VERBOSE: console.print(line)
+        if verbose: console.print(line)
     # Find dependent functions within the target function
     dependent_functions = []
     for func, line_number in all_functions_with_lines:
@@ -118,11 +119,10 @@ def analyze_function(script_path, target_function, verbose):
     if dependent_functions:
         console.print(f"[bold cyan]Dependent functions found in '{target_function}':[/bold cyan]")
         for func, line in dependent_functions:
-            console.print(f" - [bold blue]{func}[/bold blue] (Line {line})")
+            console.print(f" - [bold blue]{func} is declared at[/bold blue] line {line}")
     else:
         console.print(f"""
-        [bold cyan]No dependent functions found
-         in '{target_function}'.[/bold cyan]""")
+        [bold cyan]No dependent functions found in '{target_function}'.[/bold cyan]""")
 
 if __name__ == "__main__":
     banner()
