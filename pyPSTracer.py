@@ -3,7 +3,6 @@ pyPSTracer - A script to trace PowerShell functions and dependencies.
 Developed by @Mr_Redsmasher.
 """
 
-
 import re
 import rich_click as click
 # from rich import print as rich_print
@@ -28,7 +27,7 @@ def banner():
 
 Simple PS Function Tracer
 Used to reduce scripts like PowerView to further for obfuscation
-  @Mr_Redsmasher
+  @Mr_Redsmasher - Javi Carabantes
 """)
 
 def remove_comments(script_content):
@@ -69,7 +68,7 @@ def find_function_lines(script_content, function_name):
 def find_functions_with_lines(script_content):
     """Finds all functions in the script and returns their names along with their line numbers."""
     function_pattern = re.compile(
-        r'function\s+([a-zA-Z0-9_\-\.]+)\s*\{?', re.MULTILINE | re.IGNORECASE)
+        r'^\s?function\s+([a-zA-Z0-9_\-\.]+)\s*\{?', re.MULTILINE | re.IGNORECASE)
     functions_with_lines = []
     for match in function_pattern.finditer(script_content):
         function_name = match.group(1)
