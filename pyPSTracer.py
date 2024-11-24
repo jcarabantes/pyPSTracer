@@ -21,8 +21,7 @@ def banner():
 888       "Y88P"                                                                         
 
 Simple PS Function Tracer
-Used to reduce scripts like PowerView to further for obfuscation
-  @Mr_Redsmasher - Javi Carabantes
+  Author: Javi Carabantes
 """)
 
 def remove_comments(script_content, original_file_path):
@@ -95,10 +94,9 @@ def find_functions_with_lines(script_content):
 
       - Removing comments.
 
-      
+
       - Saving the processed script to a new file named '_no_comments.ps1'.
-    """,
-    epilog="Developed by @Mr_Redsmasher - Javi Carabantes"
+    """
 )
 @click.argument('script_path', type=click.Path(exists=True))
 @click.argument('target_function', type=str)

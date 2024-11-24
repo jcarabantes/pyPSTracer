@@ -1,12 +1,14 @@
-# pyPSTracer
+# Description
 
-`pyPSTracer` is a Python-based tool designed to trace function calls within a specific PowerShell function, helping you identify dependencies and nested function calls. It is especially useful for extracting and isolating specific functions from known PowerShell scripts like **PowerView**, **PowerUp**, and others. This facilitates the use of selected functions in engagements while minimizing AV detection through obfuscation.
+![Help Image](img/help.png)
+
+pyPSTracer is a Python-based tool designed to trace function calls within a specific PowerShell function, helping you identify dependencies and nested function calls. Useful for extracting specific functions from known PowerShell scripts like **PowerView**, **PowerUp**, and others. This facilitates the use of selected functions in engagements while minimizing AV detection through obfuscation.
 
 ## Features
 
 - Parses PowerShell scripts to locate a specific function and trace all internal function calls.
 - Ignores comments, both single-line (`#`) and multi-line (`<# ... #>`), ensuring accurate results.
-- Provides a list of dependent functions that can be selectively extracted or obfuscated.
+- Provides a list of dependent functions that can be selectively extracted.
 
 ## Installation
 
@@ -31,6 +33,11 @@ The main script is located at `pyPSTracer.py`. To run it, specify the path to th
 python pyPSTracer.py <path_to_script> <target_function_name>
 ```
 
+You can list all detected functions and include verbose to see the code of the specified function:
+```bash
+python pyPSTracer.py <path_to_script> <target_function_name> -v -l
+```
+
 ### Example
 
 To trace function calls within the `Get-ModulePrivateFunction` function of a PowerShell script:
@@ -41,5 +48,8 @@ python pyPSTracer.py ExamplePS.psm1 Get-ModulePrivateFunction
 
 The output will display all dependent functions that `Get-ModulePrivateFunction` calls within the specified script.
 
-### Errors
-There are some errors if "function" appears in a write-console, etc. but should be easy to detect
+### Known Errors
+The function detection regex must be improved probably because some FP still exists
+
+### Possible To Do
+Recursion is not implemented and could be nice with a "save file" option
