@@ -1,11 +1,6 @@
-"""
-pyPSTracer - A script to trace PowerShell functions and dependencies.
-Developed by @Mr_Redsmasher.
-"""
-
 import re
+import os
 import rich_click as click
-# from rich import print as rich_print
 from rich.console import Console
 
 console = Console()
@@ -30,38 +25,52 @@ Used to reduce scripts like PowerView to further for obfuscation
   @Mr_Redsmasher - Javi Carabantes
 """)
 
-def remove_comments(script_content):
-    """Removes single-line and multi-line comments from a PowerShell script."""
+def remove_comments(script_content, original_file_path):
+    """Removes comments and empty whitespace lines from a PowerShell script,
+       saving the result to a new file. Overwrites the file if it already exists."""
+
+    # Generate the new file path
+    new_file_path = original_file_path.replace(".ps1", "_no_comments.ps1")
+    
+    # Inform the user about the saved file
+    console.print(f"[bold green]Comments and empty lines removed. The new file is saved as:[/bold green] {new_file_path}")
+    if os.path.exists(new_file_path):
+        console.print(f"[bold yellow]Note:[/bold yellow] {new_file_path} already exists and will be overwritten.")
+    
     # Remove multi-line comments <# ... #>
     script_content = re.sub(r'<#.*?#>', '', script_content, flags=re.DOTALL)
     # Remove single-line comments #
     script_content = re.sub(r'#.*', '', script_content)
-    return script_content
+    
+    # Remove empty or whitespace-only lines
+    script_content = "\n".join(line for line in script_content.splitlines() if line.strip())
+
+    # Save the updated script to the file
+    with open(new_file_path, 'w', encoding='utf-8') as new_file:
+        new_file.write(script_content)
+    
+    return script_content, new_file_path
+
 
 def find_function_lines(script_content, function_name):
     """Finds all lines of a specific function within the script."""
-    # Split content into lines for line-by-line processing
     lines = script_content.splitlines()
-    # Regular expression to find the function definition
     function_start_pattern = re.compile(rf'^\s*function\s+{re.escape(function_name)}\s*\{{')
     function_lines = []
     in_function = False
     open_braces = 0
 
     for line in lines:
-        # If we find the start of the function
         if function_start_pattern.match(line):
             in_function = True
-            open_braces = 1  # First brace encountered
+            open_braces = 1
             function_lines.append(line)
             continue
-        # If we're inside the function, add the line
         if in_function:
             function_lines.append(line)
-            # Count braces to determine the end of the function
             open_braces += line.count("{") - line.count("}")
             if open_braces == 0:
-                break  # End of function
+                break
 
     return function_lines
 
@@ -73,48 +82,54 @@ def find_functions_with_lines(script_content):
     for match in function_pattern.finditer(script_content):
         function_name = match.group(1)
         start_pos = match.start()
-        line_number = script_content.count('\n', 0, start_pos) + 1  # Count lines up to match
+        line_number = script_content.count('\n', 0, start_pos) + 1
         functions_with_lines.append((function_name, line_number))
     return functions_with_lines
 
-@click.command(context_settings=dict(help_option_names=['-h', '--help']))
+@click.command(
+    context_settings=dict(help_option_names=['-h', '--help']),
+    help="""
+    Analyzes a PowerShell script to identify functions and dependencies.
+
+    This script processes the provided PowerShell script by:
+
+      - Removing comments.
+
+      
+      - Saving the processed script to a new file named '_no_comments.ps1'.
+    """,
+    epilog="Developed by @Mr_Redsmasher - Javi Carabantes"
+)
 @click.argument('script_path', type=click.Path(exists=True))
 @click.argument('target_function', type=str)
 @click.option('-v', '--verbose', is_flag=True, help="Enable verbose output - this will show the function code")
 @click.option('-l', '--list', is_flag=True, help="List all functions detected in the script")
 def analyze_function(script_path, target_function, verbose, list):
     """Analyzes a specific function in a PowerShell script to identify dependent functions."""
-    # Read the script content
     with open(script_path, 'r', encoding='utf-8') as file:
         script_content = file.read()
-    script_content_no_comments = remove_comments(script_content)
-    # Find all functions with their line numbers
+    script_content_no_comments, new_file_path = remove_comments(script_content, script_path)
     all_functions_with_lines = find_functions_with_lines(script_content_no_comments)
     all_functions = [func[0] for func in all_functions_with_lines]
-    # Display all functions found for debugging
-    if list: console.print("[bold yellow]Functions found in the file:[/bold yellow]", all_functions)
-    # Check if the target function is in the file
+    if list:
+        console.print("[bold yellow]Functions found in the file:[/bold yellow]", all_functions)
     if target_function not in all_functions:
         console.print(
             f"""[bold red]Error:[/bold red] the function '{target_function}' was not found in the file.""")
         return
-    # Get all lines of the target function
     target_function_lines = find_function_lines(script_content_no_comments, target_function)
-    # Display the lines of the target function
-    if verbose: console.print(f"""[bold green]Lines of the function '{target_function}':[/bold green]""")
+    if verbose:
+        console.print(f"""[bold green]Lines of the function '{target_function}':[/bold green]""")
     for line in target_function_lines:
-        if verbose: console.print(line)
-    # Find dependent functions within the target function
+        if verbose:
+            console.print(line)
     dependent_functions = []
     for func, line_number in all_functions_with_lines:
-        # Exclude the target function itself to avoid false positives
         if func != target_function:
-            # Check if any of the other functions are called within the lines of the target function
             for line in target_function_lines:
                 if re.search(rf'\b{re.escape(func)}\b', line):
                     dependent_functions.append((func, line_number))
-                    break  # Found it, no need to keep searching this function
-    # Display the dependent functions found with their line numbers
+                    break
     if dependent_functions:
         console.print(f"[bold cyan]Dependent functions found in '{target_function}':[/bold cyan]")
         for func, line in dependent_functions:
