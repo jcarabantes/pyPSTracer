@@ -10,7 +10,7 @@ pyPSTracer is a Python-based tool designed to trace function calls within a spec
 - Ignores comments, both single-line (`#`) and multi-line (`<# ... #>`), ensuring accurate results.
 - Provides a list of dependent functions that can be selectively extracted.
 
-Additionally, **pySTractor** is included for simple extraction of specific functions from PowerShell scripts. This utility removes comments, extracts the specified function (one by one, still in process), and appends it to an output file.
+Additionally, **pyPSTractor** is included for simple extraction of specific functions from PowerShell scripts. This utility removes comments, extracts the specified function (one by one, still in process), and appends it to an output file.
 
 ## Installation
 
@@ -50,12 +50,12 @@ python pyPSTracer.py ExamplePS.psm1 Get-ModulePrivateFunction
 
 The output will display all dependent functions that `Get-ModulePrivateFunction` calls within the specified script.
 
-### pySTractor
+### pyPSTractor
 
-pySTractor is a simpler tool to extract specific PowerShell functions listed in pyPSTracer. It searchs the function and appends it to an output file. This is probably a temporary script, some functions are duplicated between pyPSTracer and pyPSTractor.
+pyPSTractor is a simpler tool to extract specific PowerShell functions listed in pyPSTracer. It searchs the function and appends it to an output file. This is probably a temporary script, some functions are duplicated between pyPSTracer and pyPSTractor.
 
 ```bash
-python pySTractor.py <path_to_script> <function_name> <output_file>
+python pyPSTractor.py <path_to_script> <function_name> <output_file>
 ```
 
 #### Example
@@ -63,7 +63,7 @@ python pySTractor.py <path_to_script> <function_name> <output_file>
 To extract the function `Get-NetShare` from a script and save it to `output.ps1`:
 
 ```bash
-python pySTractor.py PowerView.ps1 Get-NetShare output.ps1
+python pyPSTractor.py PowerView.ps1 Get-NetShare output.ps1
 ```
 
 You can run the script multiple times with different functions, and they will all be appended to the same output file.
