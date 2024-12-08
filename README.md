@@ -1,76 +1,62 @@
 # Description
 
-![Help Image](img/help.png)
-
-pyPSTracer is a Python-based tool designed to trace function calls within a specific PowerShell function, helping you identify dependencies and nested function calls. Useful for extracting specific functions from known PowerShell scripts like **PowerView**, **PowerUp**, and others. This facilitates the use of selected functions in engagements while minimizing AV detection through obfuscation.
+This Python script is designed to extract a specific PowerShell function, along with all its dependencies, from a PowerShell script. By removing comments and irrelevant lines, it helps you isolate and reuse functions while minimizing potential detection issues during engagements.
 
 ## Features
 
-- Parses PowerShell scripts to locate a specific function and trace all internal function calls.
-- Ignores comments, both single-line (`#`) and multi-line (`<# ... #>`), ensuring accurate results.
-- Provides a list of dependent functions that can be selectively extracted.
+- **Extract PowerShell Functions:** Retrieve a specific function and all its dependent functions.
+- **Comment Removal:** Automatically removes single-line (`#`) and multi-line (`<# ... #>`) comments.
+- **Verbose Mode:** List all detected functions for transparency.
+- **Output Management:** Save extracted functions to a specified file.
 
-Additionally, **pyPSTractor** is included for simple extraction of specific functions from PowerShell scripts. This utility removes comments, extracts the specified function (one by one, still in process), and appends it to an output file.
+This tool is ideal for preparing PowerShell snippets for use in testing environments or engagements while ensuring minimal overhead.
 
 ## Installation
 
-1. Clone this repository:
+1. Clone the repository:
    ```bash
-   git clone https://github.com/jcarabantes/pyPSTracer/edit/main/README.md
+   git clone https://github.com/jcarabantes/pyPSTracer.git
    cd pyPSTracer
    ```
 
-2. Set up a virtual environment and install dependencies:
+2. Create a virtual environment and install dependencies:
    ```bash
    python3 -m venv venv
-   source venv/bin/activate  # For Windows use: venv\Scripts\activate
+   source venv/bin/activate  # For Windows: venv\Scripts\activate
    pip install -r requirements.txt
    ```
 
 ## Usage
 
-The main script is located at `pyPSTracer.py`. To run it, specify the path to the PowerShell script you want to analyze and the target function name to trace dependencies.
+Run the script with the following arguments:
 
 ```bash
-python pyPSTracer.py <path_to_script> <target_function_name>
+python pystractor.py <path_to_script> <function_name> <output_file>
 ```
 
-You can list all detected functions and include verbose to see the code of the specified function:
-```bash
-python pyPSTracer.py <path_to_script> <target_function_name> -v -l
-```
+### Options
+
+- **`-v / --verbose`:** Enables verbose output to list all functions detected during extraction.
 
 ### Example
 
-To trace function calls within the `Get-ModulePrivateFunction` function of a PowerShell script:
+#### Basic Extraction
+To extract the `Get-NetShare` function and its dependencies from a PowerShell script:
 
 ```bash
-python pyPSTracer.py ExamplePS.psm1 Get-ModulePrivateFunction
+python pystractor.py PowerView.ps1 Get-NetShare output.ps1
 ```
 
-The output will display all dependent functions that `Get-ModulePrivateFunction` calls within the specified script.
+### Output
 
-### pyPSTractor
+The extracted function(s) will be saved in the specified output file. If the file already exists, the new content will be appended.
 
-pyPSTractor is a simpler tool to extract specific PowerShell functions listed in pyPSTracer. It searchs the function and appends it to an output file. This is probably a temporary script, some functions are duplicated between pyPSTracer and pyPSTractor.
+## Known Issues
 
-```bash
-python pyPSTractor.py <path_to_script> <function_name> <output_file>
-```
+- The script assumes that all dependent functions are declared in the provided PowerShell script.
+- Function detection relies on regex, which may occasionally produce false positives or miss edge cases.
 
-#### Example
+## Roadmap
 
-To extract the function `Get-NetShare` from a script and save it to `output.ps1`:
-
-```bash
-python pyPSTractor.py PowerView.ps1 Get-NetShare output.ps1
-```
-
-You can run the script multiple times with different functions, and they will all be appended to the same output file.
-
-### Known Errors
-The function detection regex must be improved probably because some FP still exists
-
-### Possible To Do
-Recursion is not implemented and could be nice with a "save file" option
-Avoid duplicated functions between this two scripts (creating a single script or maybe doing a module)
+- Enhance regex for more robust function detection.
+- Add support for recursive extraction.
