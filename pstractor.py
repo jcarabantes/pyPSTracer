@@ -6,6 +6,18 @@ from rich.console import Console
 
 console = Console()
 
+def banner():
+    print("""
+
+██████╗ ███████╗████████╗██████╗  █████╗  ██████╗████████╗ ██████╗ ██████╗ 
+██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔══██╗██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗
+██████╔╝███████╗   ██║   ██████╔╝███████║██║        ██║   ██║   ██║██████╔╝
+██╔═══╝ ╚════██║   ██║   ██╔══██╗██╔══██║██║        ██║   ██║   ██║██╔══██╗
+██║     ███████║   ██║   ██║  ██║██║  ██║╚██████╗   ██║   ╚██████╔╝██║  ██║
+╚═╝     ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝
+    Author: Javi Carabantes
+    """)
+
 def remove_comments(script_content):
     """Removes comments and empty whitespace lines from a PowerShell script."""
     script_content = re.sub(r'<#.*?#>', '', script_content, flags=re.DOTALL)  # Multi-line comments
@@ -124,4 +136,5 @@ def main(script_path, function_name, output_file, verbose):
     console.print(f"[bold green]Function '{function_name}' and its dependencies extracted to:[/bold green] {output_file}")
 
 if __name__ == "__main__":
+    banner()
     main()

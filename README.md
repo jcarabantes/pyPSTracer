@@ -1,4 +1,5 @@
 # Description
+![Help Image](img/help.png)
 
 This Python script is designed to extract a specific PowerShell function, along with all its dependencies, from a PowerShell script. By removing comments and irrelevant lines, it helps you isolate and reuse functions while minimizing potential detection issues during engagements.
 
@@ -48,8 +49,10 @@ python pystractor.py PowerView.ps1 Get-NetShare output.ps1
 ```
 
 ### Output
-
 The extracted function(s) will be saved in the specified output file. If the file already exists, the new content will be appended.
+
+![Example Image](img/example.png)
+
 
 ## Known Issues
 
