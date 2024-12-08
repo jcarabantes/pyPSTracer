@@ -16,8 +16,8 @@ This tool is ideal for preparing PowerShell snippets for use in testing environm
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/jcarabantes/pyPSTracer.git
-   cd pyPSTracer
+   git clone https://github.com/jcarabantes/pstractor.git
+   cd pstractor
    ```
 
 2. Create a virtual environment and install dependencies:
@@ -32,7 +32,7 @@ This tool is ideal for preparing PowerShell snippets for use in testing environm
 Run the script with the following arguments:
 
 ```bash
-python pystractor.py <path_to_script> <function_name> <output_file>
+python pstractor.py <path_to_script> <function_name> <output_file>
 ```
 
 ### Options
@@ -45,7 +45,7 @@ python pystractor.py <path_to_script> <function_name> <output_file>
 To extract the `Get-NetShare` function and its dependencies from a PowerShell script:
 
 ```bash
-python pystractor.py PowerView.ps1 Get-NetShare output.ps1
+python pstractor.py PowerView.ps1 Get-NetShare output.ps1
 ```
 
 ### Output
